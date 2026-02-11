@@ -3,58 +3,128 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dish Diary</title>
+    <title>BiteBoard | Food Reviews</title>
     <meta
       name="description"
-      content="A personal dish diary with ratings, descriptions, photos, and map links to places that serve each dish."
+      content="Discover honest food reviews, top-rated dishes, and neighborhood favorites on BiteBoard."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header class="hero">
-      <div class="container">
-        <p class="eyebrow">🍜 Personal Food Project</p>
-        <h1>Dish Diary</h1>
-        <p class="lead">
-          This is my personal page to review dishes (not restaurants). Each entry includes a
-          photo, rating, description, and map/location references for where to find it.
+      <nav class="top-nav container">
+        <p class="brand">🍽️ BiteBoard</p>
+        <a class="cta-link" href="#add-review">Add Review</a>
+      </nav>
+      <div class="hero-content container">
+        <h1>Find your next favorite bite.</h1>
+        <p>
+          BiteBoard is a community-powered food review board. Browse top restaurants,
+          compare dishes, and share your own tasting notes.
         </p>
+        <div class="hero-stats" id="hero-stats"></div>
       </div>
     </header>
 
     <main class="container">
-      <section class="toolbar">
-        <label for="search">Search dishes</label>
-        <input id="search" type="search" placeholder="Try: ramen, biryani, dumplings..." />
+      <section class="controls card" aria-label="Review filters">
+        <div class="control-group">
+          <label for="search">Search</label>
+          <input id="search" type="search" placeholder="Restaurant, dish, neighborhood..." />
+        </div>
+        <div class="control-group">
+          <label for="cuisine-filter">Cuisine</label>
+          <select id="cuisine-filter">
+            <option value="all">All cuisines</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="sort">Sort by</label>
+          <select id="sort">
+            <option value="rating-desc">Highest rated</option>
+            <option value="rating-asc">Lowest rated</option>
+            <option value="newest">Newest review</option>
+            <option value="oldest">Oldest review</option>
+          </select>
+        </div>
       </section>
 
-      <section>
-        <p id="result-count" class="result-count"></p>
-        <div id="dish-grid" class="dish-grid"></div>
+      <section aria-live="polite" aria-busy="false">
+        <div class="section-title-row">
+          <h2>Latest Reviews</h2>
+          <p id="results-summary"></p>
+        </div>
+        <div class="review-grid" id="review-grid"></div>
+      </section>
+
+      <section id="add-review" class="card form-section">
+        <h2>Share a Review</h2>
+        <form id="review-form">
+          <div class="form-grid">
+            <label>
+              Your name
+              <input type="text" id="reviewer" required maxlength="40" />
+            </label>
+            <label>
+              Restaurant
+              <input type="text" id="restaurant" required maxlength="60" />
+            </label>
+            <label>
+              Dish
+              <input type="text" id="dish" required maxlength="60" />
+            </label>
+            <label>
+              Cuisine
+              <input type="text" id="cuisine" required maxlength="40" />
+            </label>
+            <label>
+              Neighborhood
+              <input type="text" id="neighborhood" required maxlength="40" />
+            </label>
+            <label>
+              Rating
+              <select id="rating" required>
+                <option value="">Select rating</option>
+                <option value="5">5 - Exceptional</option>
+                <option value="4">4 - Great</option>
+                <option value="3">3 - Good</option>
+                <option value="2">2 - Fair</option>
+                <option value="1">1 - Skip</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            Review
+            <textarea id="comment" rows="4" maxlength="400" required></textarea>
+          </label>
+          <button type="submit">Publish review</button>
+          <p class="form-hint">Reviews are saved in your browser (localStorage).</p>
+        </form>
       </section>
     </main>
 
-    <template id="dish-card-template">
-      <article class="dish-card">
-        <img class="dish-image" alt="" loading="lazy" />
-        <div class="dish-content">
-          <div class="dish-top">
-            <h2 class="dish-name"></h2>
-            <p class="dish-rating"></p>
-          </div>
-          <p class="dish-description"></p>
+    <footer class="container footer">
+      <p>Built for Cloudflare Pages • Static, fast, and ready to deploy.</p>
+    </footer>
 
-          <div class="locations-section">
-            <h3>Where to try this dish</h3>
-            <ul class="location-list"></ul>
-            <iframe
-              class="dish-map"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              title="Map preview"
-            ></iframe>
+    <template id="review-card-template">
+      <article class="review-card card">
+        <div class="card-top">
+          <div>
+            <h3 class="restaurant"></h3>
+            <p class="dish"></p>
           </div>
+          <p class="rating-badge"></p>
         </div>
+        <p class="meta"></p>
+        <p class="comment"></p>
+        <p class="author"></p>
       </article>
     </template>
 
