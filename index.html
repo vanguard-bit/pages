@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dish Diary</title>
+    <meta
+      name="description"
+      content="A personal dish diary with ratings, descriptions, photos, and map links to places that serve each dish."
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="container">
+        <p class="eyebrow">🍜 Personal Food Project</p>
+        <h1>Dish Diary</h1>
+        <p class="lead">
+          This is my personal page to review dishes (not restaurants). Each entry includes a
+          photo, rating, description, and map/location references for where to find it.
+        </p>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="toolbar">
+        <label for="search">Search dishes</label>
+        <input id="search" type="search" placeholder="Try: ramen, biryani, dumplings..." />
+      </section>
+
+      <section>
+        <p id="result-count" class="result-count"></p>
+        <div id="dish-grid" class="dish-grid"></div>
+      </section>
+    </main>
+
+    <template id="dish-card-template">
+      <article class="dish-card">
+        <img class="dish-image" alt="" loading="lazy" />
+        <div class="dish-content">
+          <div class="dish-top">
+            <h2 class="dish-name"></h2>
+            <p class="dish-rating"></p>
+          </div>
+          <p class="dish-description"></p>
+
+          <div class="locations-section">
+            <h3>Where to try this dish</h3>
+            <ul class="location-list"></ul>
+            <iframe
+              class="dish-map"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Map preview"
+            ></iframe>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
