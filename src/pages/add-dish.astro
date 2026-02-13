@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TabNav from '../components/TabNav.astro';
+---
+<BaseLayout title="Add Dish | Dish Diary">
+  <TabNav currentPath={Astro.url.pathname} />
+  <section class="card">
+    <h2>How to add a new dish</h2>
+    <ol>
+      <li>Create a new markdown file in <code>src/content/dishes/</code> using the template below.</li>
+      <li>Add raw image(s) into <code>raw-images/</code> (for example <code>raw-images/mtr/rava-idli.jpg</code>).</li>
+      <li>Commit and push. Cloudflare Pages will run image processing and deploy.</li>
+    </ol>
+    <pre>---
+name: "Dish Name"
+restaurant: "Restaurant Name"
+rating: 4.5
+date: 2026-02-13
+tags: [tag1, tag2]
+image: dish-name
+locations:
+  - 12.9716,77.5946
+  - 12.9823,77.6229
+---
+Notes about this dish.
+    </pre>
+  </section>
+</BaseLayout>
