@@ -1,0 +1,23 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TabNav from '../components/TabNav.astro';
+
+const dishes = (await getCollection('dishes')).sort((a,b)=> b.data.date.getTime()-a.data.date.getTime());
+---
+<BaseLayout title="Dish Diary | Home">
+  <TabNav currentPath={Astro.url.pathname} />
+
+  <section class="grid">
+    {dishes.map((dish) => (
+      <article class="card">
+        <a href={`/dish/${dish.slug}/`}>
+          <img class="thumb" src={`/images/${dish.data.image}-small.webp`} alt={dish.data.name} loading="lazy" />
+        </a>
+        <h3>{dish.data.name}</h3>
+        <p class="muted">{dish.data.restaurant}</p>
+        <p>{'★'.repeat(Math.round(dish.data.rating))} {'☆'.repeat(5-Math.round(dish.data.rating))} ({dish.data.rating.toFixed(1)})</p>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

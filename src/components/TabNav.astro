@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content';
+const { currentPath } = Astro.props;
+const dishes = (await getCollection('dishes')).sort((a,b)=> a.data.name.localeCompare(b.data.name));
+---
+<nav class="tabs" aria-label="Dish tabs">
+  {dishes.map((dish) => {
+    const href = `/dish/${dish.slug}/`;
+    const active = currentPath === href;
+    return <a class={`tab ${active ? 'active' : ''}`} href={href}>{dish.data.name}</a>;
+  })}
+  <a class={`tab ${currentPath === '/add-dish/' ? 'active' : ''}`} href="/add-dish/">+ Add Dish</a>
+</nav>

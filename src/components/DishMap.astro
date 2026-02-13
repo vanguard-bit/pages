@@ -1,0 +1,61 @@
+---
+const { locations = [], dishName = 'Dish' } = Astro.props;
+---
+<div class="map">
+  <h3>Places I ate this</h3>
+  <div id="dish-map" data-locations={JSON.stringify(locations)} data-name={dishName}></div>
+</div>
+
+<script type="module">
+  const mapEl = document.getElementById('dish-map');
+  if (mapEl) {
+    const observer = new IntersectionObserver(async ([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+
+      const ensureLeaflet = async () => {
+        if (!window.L) {
+          const css = document.createElement('link');
+          css.rel = 'stylesheet';
+          css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+          document.head.appendChild(css);
+
+          await new Promise((resolve, reject) => {
+            const js = document.createElement('script');
+            js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            js.onload = resolve;
+            js.onerror = reject;
+            document.head.appendChild(js);
+          });
+        }
+      };
+
+      await ensureLeaflet();
+      mapEl.className = 'leaflet-container';
+
+      const rawLocations = JSON.parse(mapEl.dataset.locations || '[]');
+      const points = rawLocations.map((item) => {
+        const [lat, lng] = item.split(',').map(Number);
+        return [lat, lng];
+      });
+
+      const fallback = [12.9716, 77.5946];
+      const center = points[0] || fallback;
+      const map = window.L.map(mapEl).setView(center, 12);
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      points.forEach((point, idx) => {
+        window.L.marker(point).addTo(map).bindPopup(`${mapEl.dataset.name || 'Dish'} #${idx + 1}`);
+      });
+
+      if (points.length > 1) {
+        map.fitBounds(points, { padding: [25, 25] });
+      }
+    });
+
+    observer.observe(mapEl);
+  }
+</script>
