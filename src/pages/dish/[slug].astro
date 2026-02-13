@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TabNav from '../../components/TabNav.astro';
+import DishMap from '../../components/DishMap.astro';
+
+export async function getStaticPaths() {
+  const dishes = await getCollection('dishes');
+  return dishes.map((dish) => ({ params: { slug: dish.slug }, props: { dish } }));
+}
+
+const { dish } = Astro.props;
+const stars = `${'★'.repeat(Math.round(dish.data.rating))}${'☆'.repeat(5-Math.round(dish.data.rating))}`;
+---
+<BaseLayout title={`${dish.data.name} | Dish Diary`} description={dish.body.slice(0, 140)}>
+  <TabNav currentPath={Astro.url.pathname} />
+  <article class="card">
+    <div class="row">
+      <h2>{dish.data.name}</h2>
+      <p>{stars} {dish.data.rating.toFixed(1)}/5</p>
+    </div>
+    <p class="muted">{dish.data.restaurant} · {dish.data.date.toDateString()}</p>
+    <img class="dish-image" src={`/images/${dish.data.image}.webp`} alt={dish.data.name} loading="lazy" />
+    <div style="margin-top:1rem">
+      <p>{dish.body}</p>
+    </div>
+    <DishMap locations={dish.data.locations} dishName={dish.data.name} />
+  </article>
+</BaseLayout>
