@@ -1,6 +1,13 @@
 ---
-const { title = 'Food Reviews', description = 'Personal food review blog' } = Astro.props;
+import Menu from '../components/Menu.astro';
+
+const {
+  title = 'Food Reviews',
+  description = 'Personal food review blog',
+  currentPath = '/'
+} = Astro.props;
 ---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -11,28 +18,324 @@ const { title = 'Food Reviews', description = 'Personal food review blog' } = As
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#191724" />
     <style>
-      :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--muted:#9ca3af;--accent:#22c55e;--line:#1f2937}
+      :root{
+        /* Palette from your list */
+        --base: #191724;        /* rgb(25,23,36) */
+        --surface: #1f1d2e;     /* rgb(31,29,46) */
+        --overlay: #26233a;     /* rgb(38,35,58) */
+        --muted: #6e6a86;       /* rgb(110,106,134) */
+        --subtle: #908caa;      /* rgb(144,140,170) */
+        --text: #e0def4;        /* rgb(224,222,244) */
+        --love: #eb6f92;        /* pink accent */
+        --gold: #f6c177;        /* primary accent (default) */
+        --rose: #ebbcba;
+        --pine: #31748f;
+        --foam: #9ccfd8;
+        --iris: #c4a7e7;
+        --hl-low: #21202e;
+        --hl-med: #403d52;
+        --hl-high: #524f67;
+
+        /* UI tokens */
+        --bg: var(--base);
+        --card: var(--surface);
+        --panel: var(--overlay);
+        --text-primary: var(--text);
+        --text-muted: var(--muted);
+        --accent: var(--love);
+        --accent-strong: var(--love);
+        --line: var(--hl-med);
+      }
+
       *{box-sizing:border-box}
-      body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#020617,#0f172a 220px);color:var(--text)}
-      .container{width:min(1080px,92vw);margin:0 auto;padding:1.1rem 0 2rem}
-      .muted{color:var(--muted)}
-      .tabs{display:flex;gap:.5rem;overflow-x:auto;white-space:nowrap;scrollbar-width:thin;margin:.2rem 0 1.2rem;padding:.45rem;background:#0b1220;border:1px solid var(--line);border-radius:12px}
-      .tabs::-webkit-scrollbar{height:8px}
-      .tab{border:1px solid var(--line);color:var(--text);padding:.45rem .78rem;border-radius:9px;text-decoration:none;background:#111827;display:inline-flex;align-items:center}
-      .tab.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:#10251a}
-      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
-      .card{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:.9rem}
-      .thumb{width:100%;height:160px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
-      .dish-image{width:100%;max-height:420px;object-fit:cover;border-radius:14px;border:1px solid var(--line)}
-      .row{display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap}.map{margin-top:1rem}
-      code,pre{background:#030712;border:1px solid var(--line);padding:.12rem .3rem;border-radius:6px}
-      .leaflet-container{height:340px;border-radius:12px;border:1px solid var(--line)}
+      html,body{height:100%}
+      body{
+        margin:0;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: linear-gradient(180deg, var(--bg), var(--surface) 220px);
+        color:var(--text-primary);
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+        line-height:1.45;
+      }
+
+      /* page container */
+      .container{
+        width: min(1080px, 92vw);
+        margin: 0 auto;
+        padding: 1.1rem 0 2rem;
+      }
+
+      .muted{ color: var(--text-muted) }
+
+      /* Tabs */
+      .tabs{
+        display:flex;
+        gap:.5rem;
+        overflow-x:auto;
+        white-space:nowrap;
+        scrollbar-width:thin;
+        margin:.2rem 0 1.2rem;
+        padding:.45rem;
+        background: linear-gradient(180deg, rgba(0,0,0,0.03), transparent);
+        border-radius:12px;
+        border: 1px solid var(--line);
+        backdrop-filter: blur(6px);
+      }
+      .tabs::-webkit-scrollbar{ height:8px }
+      .tab{
+        border: 1px solid var(--line);
+        color: var(--text-primary);
+        padding: .45rem .78rem;
+        border-radius:9px;
+        text-decoration:none;
+        background: var(--card);
+        display:inline-flex;
+        align-items:center;
+        gap:.5rem;
+        font-weight:600;
+        font-size:0.95rem;
+      }
+      .tab:hover{ transform: translateY(-1px); transition: transform .12s ease }
+      .tab.active{
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent) inset;
+        background: linear-gradient(180deg, rgba(246,193,119,0.06), rgba(235,111,146,0.02));
+      }
+
+      /* Grid & cards */
+      .grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+        gap:1rem;
+      }
+      .card{
+        border:1px solid var(--line);
+        background: linear-gradient(180deg, rgba(255,255,255,0.01), var(--card));
+        border-radius:14px;
+        padding:.9rem;
+        transition: box-shadow .12s ease, transform .12s ease;
+      }
+      .card:hover{
+        transform: translateY(-6px);
+        box-shadow: 0 8px 30px rgba(2,6,23,0.45);
+      }
+
+      /* Images */
+      .thumb{
+        width:100%;
+        height:160px;
+        object-fit:cover;
+        border-radius:10px;
+        border:1px solid var(--line);
+      }
+      .dish-image{
+        width:100%;
+        max-height:420px;
+        object-fit:cover;
+        border-radius:14px;
+        border:1px solid var(--line);
+      }
+
+      /* Row helpers */
+      .row{
+        display:flex;
+        gap:1rem;
+        align-items:center;
+        justify-content:space-between;
+        flex-wrap:wrap;
+      }
+
+      .map{ margin-top:1rem }
+
+      /* Code blocks */
+      code,pre{
+        background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(255,255,255,0.01));
+        border:1px solid var(--line);
+        padding:.12rem .3rem;
+        border-radius:6px;
+        color:var(--text-primary);
+      }
+
+      /* Leaflet map container */
+      .leaflet-container{
+        height:340px;
+        border-radius:12px;
+        border:1px solid var(--line);
+        background: linear-gradient(180deg, rgba(49,116,143,0.04), rgba(0,0,0,0.02));
+      }
+
+      /* Tiny responsive tweaks */
+      @media (max-width:640px){
+        .thumb{ height:140px }
+        .container{ padding: .9rem 0 1.6rem }
+        .tab{ padding:.35rem .6rem; font-size:.9rem }
+      }
+
+      /* Utility classes for badges, rating, etc. */
+      .badge{
+        display:inline-block;
+        padding:.18rem .5rem;
+        border-radius:999px;
+        font-weight:700;
+        font-size:.85rem;
+        color:var(--bg);
+        background: linear-gradient(90deg,var(--accent),var(--accent-strong));
+      }
+      .rating{ color: var(--accent) }
+      .meta{ color: var(--text-muted); font-size:0.93rem }
+
+      /* focus outline for accessibility */
+      a:focus, button:focus { outline: 3px solid rgba(196,167,231,0.12); outline-offset: 3px; border-radius:8px; }
+
+      /* ================= MOBILE OPTIMIZATION ================= */
+
+      /* Tablet */
+      @media (max-width: 768px){
+
+        .container{
+          width: 94vw;
+          padding: .8rem 0 1.4rem;
+        }
+
+        /* improve reading width */
+        main{
+          font-size: 15.5px;
+          line-height: 1.6;
+        }
+
+        /* tabs become swipe bar */
+        .tabs{
+          padding:.5rem;
+          gap:.45rem;
+          border-radius:14px;
+          position:sticky;
+          top:0;
+          z-index:10;
+          background:linear-gradient(180deg,var(--bg),rgba(25,23,36,.85));
+          backdrop-filter: blur(12px);
+        }
+
+        .tab{
+          padding:.5rem .7rem;
+          font-size:.92rem;
+          border-radius:11px;
+        }
+
+        /* cards stack vertically */
+        .grid{
+          grid-template-columns:1fr;
+          gap:.9rem;
+        }
+
+        .card{
+          padding:.85rem;
+        }
+
+        /* images more phone friendly */
+        .thumb{
+          height:170px;
+        }
+
+        .dish-image{
+          max-height:300px;
+        }
+
+        /* better spacing */
+        h1,h2,h3{
+          line-height:1.25;
+          margin:.4rem 0 .6rem;
+        }
+
+        p{
+          margin:.45rem 0;
+        }
+      }
+
+
+      /* Small phones */
+      @media (max-width: 480px){
+
+        body{
+          font-size:15px;
+        }
+
+        .container{
+          width:96vw;
+          padding:.7rem 0 1.1rem;
+        }
+
+        /* bigger tap targets */
+        .tab{
+          padding:.55rem .75rem;
+          font-size:.9rem;
+        }
+
+        /* hero image shouldn't dominate screen */
+        .dish-image{
+          max-height:240px;
+          border-radius:12px;
+        }
+
+        /* cards tighter but clearer */
+        .card{
+          border-radius:12px;
+          padding:.75rem;
+        }
+
+        .thumb{
+          height:150px;
+        }
+
+        /* map shouldn't feel infinite */
+        .leaflet-container{
+          height:260px;
+        }
+
+        /* rating + meta stacking */
+        .row{
+          flex-direction:column;
+          align-items:flex-start;
+          gap:.4rem;
+        }
+      }
+      /* layout grid */
+      .layout-grid{
+        display:grid;
+        grid-template-columns: 1fr;
+        gap:1rem;
+      }
+
+/* ===== DESKTOP LAYOUT STRUCTURE ===== */
+
+.layout-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:1.2rem;
+}
+
+/* Desktop: sidebar + content */
+@media (min-width: 900px){
+  .layout-grid{
+    grid-template-columns: 280px minmax(0,1fr);
+    align-items:start;
+  }
+
+  .content{
+    min-width:0;
+  }
+}
     </style>
   </head>
+
   <body>
-    <main class="container">
-      <slot />
+    <main class="container layout-grid">
+      <Menu currentPath={currentPath} />
+      <section class="content" role="main">
+        <slot />
+      </section>
     </main>
   </body>
 </html>

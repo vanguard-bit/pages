@@ -1,0 +1,311 @@
+---
+import { getCollection } from 'astro:content';
+const { currentPath = '/' } = Astro.props;
+
+const dishes = (await getCollection('dishes')).sort((a,b)=> a.data.name.localeCompare(b.data.name));
+---
+<nav class="menu" aria-label="Dish navigation">
+  <!-- Mobile hamburger -->
+  <button class="menu-toggle" aria-expanded="false" aria-controls="dish-list" id="menuToggle" title="Open menu">
+    <span class="hamb" aria-hidden="true"></span>
+    <span class="sr">Open menu</span>
+  </button>
+
+  <!-- Sidebar / Drawer -->
+  <aside id="dish-list" class="menu-drawer" data-open="false" role="navigation" aria-label="Dish list">
+    <div class="menu-header">
+      <h3>My Dishes</h3>
+
+      <!-- Collapse button (desktop) -->
+      <button class="collapse" id="collapseBtn" aria-label="Collapse sidebar" title="Toggle collapse">◀</button>
+
+      <!-- Close button (mobile) -->
+      <button class="close" id="menuClose" aria-label="Close menu" title="Close menu">✕</button>
+    </div>
+
+    <div class="menu-search">
+      <input id="menuSearch" type="search" placeholder="Search dishes…" aria-label="Search dishes" />
+    </div>
+
+    <ul class="menu-list" role="list">
+      <li class={`menu-item ${currentPath === '/' ? 'active' : ''}`} data-name="all dishes">
+        <a href="/" class="menu-link" data-label="All Dishes">
+          <img src="/images/all-dishes-small.webp" alt="" loading="lazy" />
+          <span class="label"><strong>All Dishes</strong></span>
+        </a>
+      </li>
+
+      {dishes.map(dish => {
+        const href = `/dish/${dish.slug}/`;
+        const active = currentPath === href;
+        return (
+          <li class={`menu-item ${active ? 'active' : ''}`} data-name={dish.data.name.toLowerCase()}>
+            <a class="menu-link" href={href} data-label={dish.data.name}>
+              <img src={`/images/${dish.data.image}-small.webp`} alt={`${dish.data.name} thumbnail`} loading="lazy" />
+              <span class="label">{dish.data.name}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </aside>
+</nav>
+
+<style>
+/* ===================== Basic & utilities ===================== */
+/* visually hidden */
+.sr{ position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden }
+
+.menu { position: relative; }
+
+/* hamburger button */
+.menu-toggle{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  background:transparent;
+  border:1px solid var(--line);
+  color:var(--text-primary);
+  padding:.4rem .6rem;
+  border-radius:10px;
+  cursor:pointer;
+}
+.hamb{
+  width:18px;height:2px;background:var(--text-primary);position:relative;border-radius:2px;
+}
+.hamb::before, .hamb::after{ content:'';position:absolute;left:0;width:18px;height:2px;background:inherit;border-radius:2px}
+.hamb::before{ top:-6px } .hamb::after{ top:6px }
+
+/* Header inside drawer */
+.menu-header{ display:flex;align-items:center;justify-content:space-between; gap:.5rem; margin-bottom:.4rem }
+.menu-header h3{ margin:0; font-size:1.05rem; color:var(--text-primary) }
+
+/* collapse & close buttons */
+.menu-header .collapse,
+.menu-header .close{
+  background:transparent;border:0;color:var(--text-muted);font-size:1.05rem;cursor:pointer;padding:.25rem .4rem;border-radius:8px;
+}
+.menu-header .collapse:hover,
+.menu-header .close:hover{ background: rgba(255,255,255,0.02) }
+
+/* Search */
+.menu-search{ margin-bottom:.45rem }
+.menu-search input{
+  width:100%;
+  padding:.45rem .6rem;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text-primary);
+  font-size:.95rem;
+}
+.menu-search input::placeholder{ color:var(--text-muted) }
+
+/* List */
+.menu-list{ list-style:none;margin:0;padding:0; display:flex;flex-direction:column; gap:.35rem; overflow:auto; max-height:60vh }
+.menu-item{ display:block }
+.menu-link{
+  display:flex;
+  gap:.6rem;
+  align-items:center;
+  padding:.45rem .45rem;
+  border-radius:8px;
+  text-decoration:none;
+  color:var(--subtle);
+  position:relative;
+}
+.menu-link img{ width:42px;height:42px;object-fit:cover;border-radius:8px;border:1px solid var(--hl-med) }
+.menu-link .label{ font-weight:600; color:var(--text-primary) }
+
+/* active */
+.menu-item.active .menu-link{
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 12%, transparent), rgba(235,111,146,0.02));
+  border:1px solid rgba(255,255,255,0.02);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+  color:var(--text-primary);
+}
+
+/* tooltip when collapsed */
+.menu-link::after{
+  display:none;
+}
+
+/* scrollbar styling */
+.menu-list::-webkit-scrollbar{ width:8px; height:8px }
+.menu-list::-webkit-scrollbar-thumb{ background:var(--hl-med); border-radius:999px }
+
+/* ========== DESKTOP SIDEBAR ========== */
+@media (min-width: 900px){
+
+  .menu { width: 260px; flex: 0 0 260px; }
+  .menu-toggle{ display:none }
+  .menu-drawer{
+    position: sticky;
+    top:1.2rem;
+    width:100%;
+    height: calc(100vh - 3.2rem);
+    overflow:auto;
+    box-shadow:none;
+    transform:none !important;
+    z-index:auto;
+    padding:.8rem;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), var(--card));
+    border-radius:12px;
+    border:1px solid var(--line);
+  }
+
+  /* collapse state: narrow rail */
+  body.menu-collapsed .menu { width: 72px; flex:0 0 72px }
+  body.menu-collapsed .menu-drawer { padding:.6rem .35rem }
+  body.menu-collapsed .menu-header h3,
+  body.menu-collapsed .menu-search,
+  body.menu-collapsed .menu-link .label { display:none }
+  body.menu-collapsed .menu-link { justify-content:center; padding:.55rem }
+  body.menu-collapsed .menu-link img { width:34px;height:34px }
+
+  /* tooltip on hover when collapsed */
+  body.menu-collapsed .menu-link:hover::after{
+    content: attr(data-label);
+    display:block;
+    position:absolute;
+    left:110%;
+    top:50%;
+    transform:translateY(-50%);
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:.28rem .5rem;
+    border-radius:6px;
+    white-space:nowrap;
+    font-size:.85rem;
+    color:var(--text-primary);
+    z-index:2000;
+  }
+
+  /* hide close button on desktop (we keep collapse) */
+  .menu-header .close { display:none }
+}
+
+/* ========== MOBILE DRAWER (improved contrast + rose-pine tint) ========== */
+@media (max-width: 899px){
+
+  .menu-toggle{ display:flex }
+
+  .menu-drawer{
+    position:fixed;
+    left:12px;
+    top:12px;
+    transform:translateX(-110%);
+    transition:transform .28s cubic-bezier(.2,.8,.2,1);
+    z-index:2000; /* higher so it sits above images */
+    width: calc(100vw - 24px);
+    max-width: 260px;
+    padding:.9rem;
+
+    /* strong tinted frosted background (rose-pine inspired) */
+    background:
+      linear-gradient(rgba(196,167,231,0.03), rgba(196,167,231,0.02)),
+      linear-gradient(180deg, rgba(38,35,58,0.96), rgba(31,29,46,0.98));
+    /* keep some blur but rely on opacity for contrast */
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+
+    border:1px solid rgba(82,79,103,0.35); /* --hl-high with alpha */
+    box-shadow:
+      0 14px 40px rgba(0,0,0,0.65),
+      inset 0 1px 0 rgba(255,255,255,0.02);
+    border-radius:12px;
+  }
+
+  .menu-drawer[data-open="true"]{ transform:translateX(0) }
+
+  /* hide collapse button in mobile */
+  .menu-header .collapse { display:none }
+}
+
+/* ensure menu links are always high contrast */
+.menu-link{
+  color: var(--text-primary) !important;
+}
+.menu-link:hover{
+  background: rgba(196,167,231,0.06);
+  color: var(--text-primary);
+}
+</style>
+
+<script>
+/* Drawer toggle + search + collapse (vanilla, tiny) */
+(() => {
+  const toggle = document.getElementById('menuToggle');
+  const closeBtn = document.getElementById('menuClose');
+  const drawer = document.getElementById('dish-list');
+  const search = document.getElementById('menuSearch');
+  const collapseBtn = document.getElementById('collapseBtn');
+
+  // apply saved collapsed state on load
+  try {
+    const saved = localStorage.getItem('menu-collapsed');
+    if (saved === 'true') document.body.classList.add('menu-collapsed');
+  } catch (e) { /* ignore localStorage errors */ }
+
+  // Update collapse button icon based on state
+  function updateCollapseIcon() {
+    if (!collapseBtn) return;
+    collapseBtn.textContent = document.body.classList.contains('menu-collapsed') ? '▶' : '◀';
+  }
+  updateCollapseIcon();
+
+  // Drawer toggle (mobile)
+  if (toggle && drawer) {
+    toggle.addEventListener('click', () => {
+      const open = drawer.getAttribute('data-open') === 'true';
+      drawer.setAttribute('data-open', (!open).toString());
+      toggle.setAttribute('aria-expanded', String(!open));
+    });
+  }
+
+  // Close button (mobile)
+  if (closeBtn && drawer) {
+    closeBtn.addEventListener('click', () => {
+      drawer.setAttribute('data-open', 'false');
+      if (toggle) toggle.setAttribute('aria-expanded','false');
+    });
+  }
+
+  // Collapse button (desktop)
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', () => {
+      const collapsed = document.body.classList.toggle('menu-collapsed');
+      try { localStorage.setItem('menu-collapsed', collapsed ? 'true' : 'false'); } catch (e) {}
+      updateCollapseIcon();
+    });
+  }
+
+  // Search filter
+  if (search) {
+    search.addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      document.querySelectorAll('.menu-item').forEach(li => {
+        const name = li.dataset.name || '';
+        li.style.display = (!q || name.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+
+  // close drawer when clicking a link (mobile)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('.menu-link');
+    if (link && window.innerWidth < 900) {
+      drawer.setAttribute('data-open', 'false');
+      if (toggle) toggle.setAttribute('aria-expanded','false');
+    }
+  });
+
+  // Accessibility: close drawer with Escape when open (mobile)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && window.innerWidth < 900) {
+      drawer.setAttribute('data-open', 'false');
+      if (toggle) toggle.setAttribute('aria-expanded','false');
+    }
+  });
+})();
+</script>

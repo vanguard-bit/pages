@@ -1,23 +1,24 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import TabNav from '../components/TabNav.astro';
 
+const currentPath = Astro.url.pathname;
 const dishes = (await getCollection('dishes')).sort((a,b)=> b.data.date.getTime()-a.data.date.getTime());
 ---
-<BaseLayout title="Dish Diary | Home">
-  <TabNav currentPath={Astro.url.pathname} />
-
-  <section class="grid">
-    {dishes.map((dish) => (
-      <article class="card">
-        <a href={`/dish/${dish.slug}/`}>
-          <img class="thumb" src={`/images/${dish.data.image}-small.webp`} alt={dish.data.name} loading="lazy" />
+<BaseLayout currentPath={currentPath} title="All Dishes">
+  <section class="grid" role="list">
+    {dishes.map((dish) => {
+      const href = `/dish/${dish.slug}/`;
+      return (
+        <a class="card-link" href={href} aria-label={`Open ${dish.data.name} review`}>
+          <article class="card" role="listitem">
+            <img class="thumb" src={`/images/${dish.data.image}-small.webp`} alt={dish.data.name} loading="lazy" />
+            <h3>{dish.data.name}</h3>
+            <p class="muted">{dish.data.restaurant}</p>
+            <p aria-hidden="true">{'★'.repeat(Math.round(dish.data.rating))} {'☆'.repeat(5-Math.round(dish.data.rating))} <span class="muted">({dish.data.rating.toFixed(1)})</span></p>
+          </article>
         </a>
-        <h3>{dish.data.name}</h3>
-        <p class="muted">{dish.data.restaurant}</p>
-        <p>{'★'.repeat(Math.round(dish.data.rating))} {'☆'.repeat(5-Math.round(dish.data.rating))} ({dish.data.rating.toFixed(1)})</p>
-      </article>
-    ))}
+      );
+    })}
   </section>
 </BaseLayout>

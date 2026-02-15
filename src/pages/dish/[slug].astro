@@ -1,29 +1,86 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import TabNav from '../../components/TabNav.astro';
 import DishMap from '../../components/DishMap.astro';
 
 export async function getStaticPaths() {
   const dishes = await getCollection('dishes');
+  // returning props so `dish` is available via Astro.props (fine for a small personal site)
   return dishes.map((dish) => ({ params: { slug: dish.slug }, props: { dish } }));
 }
 
+const currentPath = Astro.url.pathname;
 const { dish } = Astro.props;
-const stars = `${'★'.repeat(Math.round(dish.data.rating))}${'☆'.repeat(5-Math.round(dish.data.rating))}`;
+
+// Build star visuals (keeps your approach) and SR text for screen readers
+const ratingRounded = Math.round(dish.data.rating);
+const stars = `${'★'.repeat(ratingRounded)}${'☆'.repeat(5 - ratingRounded)}`;
+const ratingSR = `${dish.data.rating.toFixed(1)} out of 5`;
+
+// Handle dish body robustly: if it's a string we show it inside a paragraph;
+// if it's a renderable Content component, the project setup may expose it as a function/component.
+// We'll try to be defensive: if dish.body is string -> use it, otherwise try to render as component/html.
+let renderedBodyHtml = null;
+let showAsComponent = false;
+
+if (dish.body) {
+  if (typeof dish.body === 'string') {
+    renderedBodyHtml = dish.body;
+  } else if (typeof dish.body === 'object' && 'render' in dish.body) {
+    // Some Astro content APIs expose a render() that returns {html, css} — try that if available
+    try {
+      const maybe = await dish.body.render();
+      if (maybe && typeof maybe.html === 'string') {
+        renderedBodyHtml = maybe.html;
+      } else {
+        showAsComponent = true; // fallback, may be a component
+      }
+    } catch (e) {
+      // fallback: treat as component if possible
+      showAsComponent = true;
+    }
+  } else {
+    // Unknown type — try to coerce to string
+    renderedBodyHtml = String(dish.body);
+  }
+}
 ---
-<BaseLayout title={`${dish.data.name} | Dish Diary`} description={dish.body.slice(0, 140)}>
-  <TabNav currentPath={Astro.url.pathname} />
-  <article class="card">
+<BaseLayout currentPath={currentPath} title={`${dish.data.name} | Dish Diary`} description={String(dish.data.excerpt ?? dish.data.description ?? '').slice(0,140)}>
+  <article class="card" aria-labelledby="dish-title">
     <div class="row">
-      <h2>{dish.data.name}</h2>
-      <p>{stars} {dish.data.rating.toFixed(1)}/5</p>
+      <h2 id="dish-title">{dish.data.name}</h2>
+      <p aria-hidden="true" class="rating">{stars} <span class="muted">({dish.data.rating.toFixed(1)})</span></p>
+      <p class="sr">Rating: {ratingSR}</p>
     </div>
-    <p class="muted">{dish.data.restaurant} · {dish.data.date.toDateString()}</p>
-    <img class="dish-image" src={`/images/${dish.data.image}.webp`} alt={dish.data.name} loading="lazy" />
+
+    <p class="muted">{dish.data.restaurant} · {new Date(dish.data.date).toDateString()}</p>
+
+    <img
+      class="dish-image"
+      src={`/images/${dish.data.image}.webp`}
+      alt={dish.data.name}
+      loading="lazy"
+      width="1200"
+    />
+
     <div style="margin-top:1rem">
-      <p>{dish.body}</p>
+      {renderedBodyHtml ? (
+        /* safe: insert pre-rendered HTML from markdown render path */
+        <div set:html={renderedBodyHtml} />
+      ) : showAsComponent && dish.body ? (
+        /* if dish.body is a renderable component, render it */
+        <div class="content">
+          { /* In some setups dish.body is already a component, e.g. <Content />; attempt to render it */ }
+          { dish.body }
+        </div>
+      ) : (
+        /* final fallback */
+        <p>{String(dish.body ?? '')}</p>
+      )}
     </div>
-    <DishMap locations={dish.data.locations} dishName={dish.data.name} />
+
+    <div class="map">
+      <DishMap locations={dish.data.locations} dishName={dish.data.name} />
+    </div>
   </article>
 </BaseLayout>

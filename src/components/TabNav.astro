@@ -1,13 +1,114 @@
 ---
 import { getCollection } from 'astro:content';
 const { currentPath } = Astro.props;
-const dishes = (await getCollection('dishes')).sort((a,b)=> a.data.name.localeCompare(b.data.name));
+
+const dishes = (await getCollection('dishes'))
+  .sort((a,b)=> a.data.name.localeCompare(b.data.name));
 ---
+
 <nav class="tabs" aria-label="Dish tabs">
-  <a class={`tab ${currentPath === '/' ? 'active' : ''}`} href="/">All Dishes</a>
+  <a class={`tab home ${currentPath === '/' ? 'active' : ''}`} href="/">
+    <span class="dot"></span>
+    All
+  </a>
+
   {dishes.map((dish) => {
     const href = `/dish/${dish.slug}/`;
     const active = currentPath === href;
-    return <a class={`tab ${active ? 'active' : ''}`} href={href}>{dish.data.name}</a>;
+
+    return (
+      <a class={`tab ${active ? 'active' : ''}`} href={href}>
+        <img
+          src={`/images/${dish.data.image}-small.webp`}
+          alt=""
+          loading="lazy"
+        />
+        <span>{dish.data.name}</span>
+      </a>
+    );
   })}
 </nav>
+
+<script>
+  const active = document.querySelector('.tab.active');
+  active?.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+</script>
+<style>
+
+.tabs{
+  position:relative;
+  display:flex;
+  gap:.4rem;
+  overflow-x:auto;
+  padding:.55rem;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.15));
+  backdrop-filter:blur(10px);
+  scroll-behavior:smooth;
+}
+
+/* individual tab */
+.tab{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  padding:.42rem .7rem;
+  border-radius:10px;
+  text-decoration:none;
+  color:var(--subtle);
+  background:transparent;
+  border:1px solid transparent;
+  font-size:.92rem;
+  white-space:nowrap;
+  transition:all .18s ease;
+}
+
+/* thumbnail */
+.tab img{
+  width:26px;
+  height:26px;
+  object-fit:cover;
+  border-radius:7px;
+  border:1px solid var(--hl-med);
+}
+
+/* hover */
+.tab:hover{
+  color:var(--text);
+  background:rgba(255,255,255,0.04);
+  transform:translateY(-1px);
+}
+
+/* active */
+.tab.active{
+  color:var(--text);
+  border-color:var(--accent);
+  background:linear-gradient(
+    180deg,
+    rgba(246,193,119,0.12),
+    rgba(246,193,119,0.04)
+  );
+  box-shadow:0 0 0 1px rgba(246,193,119,0.35) inset;
+}
+
+/* home dot */
+.home .dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--accent);
+}
+
+/* scrollbar (nice subtle one) */
+.tabs::-webkit-scrollbar{height:6px}
+.tabs::-webkit-scrollbar-thumb{
+  background:var(--hl-med);
+  border-radius:999px;
+}
+
+/* mobile */
+@media(max-width:640px){
+  .tab span{max-width:90px;overflow:hidden;text-overflow:ellipsis}
+}
+</style>
