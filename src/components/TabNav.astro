@@ -43,7 +43,7 @@ const dishes = (await getCollection('dishes'))
   padding:.55rem;
   border-radius:14px;
   border:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.15));
+  background:var(--surface-glass);
   backdrop-filter:blur(10px);
   scroll-behavior:smooth;
 }
@@ -76,7 +76,7 @@ const dishes = (await getCollection('dishes'))
 /* hover */
 .tab:hover{
   color:var(--text);
-  background:rgba(255,255,255,0.04);
+  background:var(--hover);
   transform:translateY(-1px);
 }
 
@@ -86,10 +86,10 @@ const dishes = (await getCollection('dishes'))
   border-color:var(--accent);
   background:linear-gradient(
     180deg,
-    rgba(246,193,119,0.12),
-    rgba(246,193,119,0.04)
+    color-mix(in srgb, var(--accent) 18%, transparent),
+    color-mix(in srgb, var(--accent) 8%, transparent)
   );
-  box-shadow:0 0 0 1px rgba(246,193,119,0.35) inset;
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent) inset;
 }
 
 /* home dot */

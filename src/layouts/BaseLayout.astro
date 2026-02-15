@@ -21,7 +21,7 @@ const {
     <meta name="theme-color" content="#191724" />
     <style>
       :root{
-        /* Palette from your list */
+        /* Base palette */
         --base: #191724;        /* rgb(25,23,36) */
         --surface: #1f1d2e;     /* rgb(31,29,46) */
         --overlay: #26233a;     /* rgb(38,35,58) */
@@ -38,15 +38,62 @@ const {
         --hl-med: #403d52;
         --hl-high: #524f67;
 
-        /* UI tokens */
-        --bg: var(--base);
-        --card: var(--surface);
-        --panel: var(--overlay);
+        /* Semantic tokens */
+        --background: var(--base);
+        --surface-1: var(--surface);
+        --surface-2: var(--overlay);
         --text-primary: var(--text);
         --text-muted: var(--muted);
+        --border: var(--hl-med);
         --accent: var(--love);
         --accent-strong: var(--love);
-        --line: var(--hl-med);
+        --hover: color-mix(in srgb, var(--accent) 10%, transparent);
+        --highlight: color-mix(in srgb, var(--iris) 20%, transparent);
+
+        --shadow-elev-1: 0 8px 30px rgba(2,6,23,0.45);
+        --surface-glass: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.14));
+        --surface-card: linear-gradient(180deg, rgba(255,255,255,0.01), var(--surface-1));
+        --surface-active: linear-gradient(180deg, color-mix(in srgb, var(--accent) 18%, transparent), color-mix(in srgb, var(--accent) 8%, transparent));
+
+        --focus-ring: color-mix(in srgb, var(--iris) 18%, transparent);
+        --selection-bg: color-mix(in srgb, var(--accent) 35%, transparent);
+        --selection-text: var(--text-primary);
+
+        /* Backwards compatibility aliases */
+        --bg: var(--background);
+        --card: var(--surface-1);
+        --panel: var(--surface-2);
+        --line: var(--border);
+      }
+
+      :root[data-theme='latte']{
+        --base: #faf4ed;
+        --surface: #fffaf4;
+        --overlay: #f2e9e1;
+        --text: #575279;
+        --muted: #797593;
+        --love: #b4637a;
+        --iris: #907aa9;
+        --hl-med: #dfdad9;
+        --hl-high: #cecacd;
+        --surface-glass: linear-gradient(180deg, rgba(87,82,121,0.03), rgba(87,82,121,0.01));
+        --surface-card: linear-gradient(180deg, rgba(255,255,255,0.8), var(--surface-1));
+        --shadow-elev-1: 0 8px 24px rgba(87,82,121,0.12);
+      }
+
+      :root[data-theme='amoled']{
+        --base: #000000;
+        --surface: #07070a;
+        --overlay: #101015;
+        --text: #f5f5f7;
+        --muted: #9fa1ac;
+        --love: #ff6fa9;
+        --iris: #c8b2ff;
+        --hl-med: #23232a;
+        --hl-high: #30303a;
+        --surface-glass: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        --surface-card: linear-gradient(180deg, rgba(255,255,255,0.015), var(--surface-1));
+        --shadow-elev-1: 0 8px 30px rgba(0,0,0,0.75);
       }
 
       *{box-sizing:border-box}
@@ -54,11 +101,16 @@ const {
       body{
         margin:0;
         font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-        background: linear-gradient(180deg, var(--bg), var(--surface) 220px);
+        background: linear-gradient(180deg, var(--background), var(--surface-1) 220px);
         color:var(--text-primary);
         -webkit-font-smoothing:antialiased;
         -moz-osx-font-smoothing:grayscale;
         line-height:1.45;
+      }
+
+      ::selection{
+        background: var(--selection-bg);
+        color: var(--selection-text);
       }
 
       /* page container */
@@ -79,7 +131,7 @@ const {
         scrollbar-width:thin;
         margin:.2rem 0 1.2rem;
         padding:.45rem;
-        background: linear-gradient(180deg, rgba(0,0,0,0.03), transparent);
+        background: var(--surface-glass);
         border-radius:12px;
         border: 1px solid var(--line);
         backdrop-filter: blur(6px);
@@ -102,7 +154,7 @@ const {
       .tab.active{
         border-color: var(--accent);
         box-shadow: 0 0 0 1px var(--accent) inset;
-        background: linear-gradient(180deg, rgba(246,193,119,0.06), rgba(235,111,146,0.02));
+        background: var(--surface-active);
       }
 
       /* Grid & cards */
@@ -113,14 +165,14 @@ const {
       }
       .card{
         border:1px solid var(--line);
-        background: linear-gradient(180deg, rgba(255,255,255,0.01), var(--card));
+        background: var(--surface-card);
         border-radius:14px;
         padding:.9rem;
         transition: box-shadow .12s ease, transform .12s ease;
       }
       .card:hover{
         transform: translateY(-6px);
-        box-shadow: 0 8px 30px rgba(2,6,23,0.45);
+        box-shadow: var(--shadow-elev-1);
       }
 
       /* Images */
@@ -164,7 +216,7 @@ const {
         height:340px;
         border-radius:12px;
         border:1px solid var(--line);
-        background: linear-gradient(180deg, rgba(49,116,143,0.04), rgba(0,0,0,0.02));
+        background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 8%, transparent), color-mix(in srgb, var(--background) 80%, transparent));
       }
 
       /* Tiny responsive tweaks */
@@ -181,14 +233,14 @@ const {
         border-radius:999px;
         font-weight:700;
         font-size:.85rem;
-        color:var(--bg);
+        color:var(--background);
         background: linear-gradient(90deg,var(--accent),var(--accent-strong));
       }
       .rating{ color: var(--accent) }
       .meta{ color: var(--text-muted); font-size:0.93rem }
 
       /* focus outline for accessibility */
-      a:focus, button:focus { outline: 3px solid rgba(196,167,231,0.12); outline-offset: 3px; border-radius:8px; }
+      a:focus, button:focus, input:focus, select:focus { outline: 3px solid var(--focus-ring); outline-offset: 3px; border-radius:8px; }
 
       /* ================= MOBILE OPTIMIZATION ================= */
 
@@ -214,7 +266,7 @@ const {
           position:sticky;
           top:0;
           z-index:10;
-          background:linear-gradient(180deg,var(--bg),rgba(25,23,36,.85));
+          background:linear-gradient(180deg,var(--background),color-mix(in srgb, var(--background) 85%, transparent));
           backdrop-filter: blur(12px);
         }
 
@@ -316,6 +368,28 @@ const {
   gap:1.2rem;
 }
 
+.theme-control{
+  margin-top: 1.2rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.theme-control select{
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border-radius: 8px;
+  font-size: .72rem;
+  padding: .2rem .3rem;
+  opacity: .35;
+}
+
+.theme-control select:hover,
+.theme-control select:focus-visible{
+  opacity: .9;
+  color: var(--text-primary);
+}
+
 /* Desktop: sidebar + content */
 @media (min-width: 900px){
   .layout-grid{
@@ -335,7 +409,53 @@ const {
       <Menu currentPath={currentPath} />
       <section class="content" role="main">
         <slot />
+        <footer class="theme-control" aria-label="Theme controls">
+          <select id="themePicker" aria-label="Theme picker" title="Theme (Ctrl+Shift+T)">
+            <option value="rose-pine">rose pine</option>
+            <option value="latte">latte</option>
+            <option value="amoled">amoled</option>
+          </select>
+        </footer>
       </section>
     </main>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const picker = document.getElementById('themePicker');
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        const themes = ['rose-pine', 'latte', 'amoled'];
+
+        const applyTheme = (theme) => {
+          const selected = themes.includes(theme) ? theme : 'rose-pine';
+          if (selected === 'rose-pine') {
+            root.removeAttribute('data-theme');
+          } else {
+            root.setAttribute('data-theme', selected);
+          }
+          if (picker) picker.value = selected;
+          if (themeMeta) {
+            const base = getComputedStyle(root).getPropertyValue('--background').trim();
+            if (base) themeMeta.setAttribute('content', base);
+          }
+          try { localStorage.setItem('site-theme', selected); } catch (e) {}
+        };
+
+        let savedTheme = 'rose-pine';
+        try { savedTheme = localStorage.getItem('site-theme') || 'rose-pine'; } catch (e) {}
+        applyTheme(savedTheme);
+
+        picker?.addEventListener('change', (event) => {
+          applyTheme(event.target.value);
+        });
+
+        document.addEventListener('keydown', (event) => {
+          if (!(event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 't')) return;
+          event.preventDefault();
+          const current = picker?.value || savedTheme;
+          const next = themes[(themes.indexOf(current) + 1) % themes.length];
+          applyTheme(next);
+        });
+      })();
+    </script>
   </body>
 </html>
